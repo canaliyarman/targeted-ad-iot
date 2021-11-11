@@ -1,9 +1,9 @@
 # targeted-ad-iot
 
-Go https://github.com/smahesh29/Gender-and-Age-Detection here to get the pre trained models
+Requirements are in requirements.txt
 
-http://www.steves-internet-guide.com/into-mqtt-python-client/
+image_pub.py captures frames using opencv, converts them into bytearrays and publishes to broker under topic 'face/cam1'
+After an image is received by image_sub.py trained models are used to detect faces, extract gender and age information.
+Information is then published to the broker under topic 'face/val', image capturing device receives this information and prints it.
 
-http://www.steves-internet-guide.com/client-objects-python-mqtt/
-
-https://gist.github.com/WakeupTsai/6cac70f8e9f26cc909e9223346580a0f
+"test.mosquitto.org" broker is used, change for local broker.
