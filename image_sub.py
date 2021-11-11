@@ -3,7 +3,7 @@ import time
 import cv2
 import numpy as np
 import base64
-
+import os
 
 faceProto="opencv_face_detector.pbtxt"
 faceModel="opencv_face_detector_uint8.pb"
@@ -12,7 +12,13 @@ ageModel="age_net.caffemodel"
 genderProto="gender_deploy.prototxt"
 genderModel="gender_net.caffemodel"
 
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    client.subscribe("face/cam1")
+
 def highlightFace(net, frame, conf_threshold=0.7):
+    if frame is None:
+        return 0, []
     frameOpencvDnn=frame.copy()
     frameHeight=frameOpencvDnn.shape[0]
     frameWidth=frameOpencvDnn.shape[1]
@@ -47,12 +53,15 @@ def on_message(client, userdata, message,):
     img = cv2.imdecode(jpg_as_np, flags=1)
     
     cv2.imwrite('./0.jpg', img)
-    
     frame = cv2.imread('./0.jpg')
+    os.remove('./0.jpg')
+    
     padding=20
     resultImg,faceBoxes=highlightFace(faceNet,frame)
     if not faceBoxes:
         print("No face detected")
+        message = client.publish("face/val", "no face")
+        return
 
     for faceBox in faceBoxes:
         face=frame[max(0,faceBox[1]-padding):
@@ -69,6 +78,7 @@ def on_message(client, userdata, message,):
         agePreds=ageNet.forward()
         age=ageList[agePreds[0].argmax()]
         print(f'Age: {age[1:-1]} years')
+        message = client.publish("face/val", str(gender) + ", " + str(age))
 
 faceNet=cv2.dnn.readNet(faceModel,faceProto)
 ageNet=cv2.dnn.readNet(ageModel,ageProto)
@@ -77,9 +87,10 @@ MODEL_MEAN_VALUES=(78.4263377603, 87.7689143744, 114.895847746)
 ageList=['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
 genderList=['Male','Female']
 
-mqttBroker="192.168.1.102"
-client = mqtt.Client("test_consumer")
+mqttBroker="test.mosquitto.org"
+client = mqtt.Client("test_image_processor")
 client.connect(mqttBroker,1883,60)
-client.subscribe("test")
+
 client.on_message=on_message
+client.on_connect = on_connect
 client.loop_forever()
