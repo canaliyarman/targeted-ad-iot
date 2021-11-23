@@ -4,7 +4,7 @@ import time
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    client.subscribe("face/val1")
+    client.subscribe("face/val2")
 
 def on_message(client, userdata, message,):
     print(str(message.payload))
@@ -22,5 +22,5 @@ while True:
     cap = cv2.VideoCapture(0)
     hasFrame, frame = cap.read()
     image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
-    message = client.publish("face/cam1", image_bytes)
+    message = client.publish("face/cam2", image_bytes)
     client.loop()
