@@ -19,7 +19,7 @@ def on_connect(client, userdata, flags, rc):
     print("Connected to camera 2 with result code "+str(rc))
     client.subscribe("face/cam2")
 
-for i in range (1,3):
+for j in range (1,3):
 
     def highlightFace(net, frame, conf_threshold=0.7):
         if frame is None:
@@ -64,8 +64,8 @@ for i in range (1,3):
         padding=20
         resultImg,faceBoxes=highlightFace(faceNet,frame)
         if not faceBoxes:
-            print("No face detected on camera "+str(i))
-            message = client.publish("face/val"+str(i), "no face")
+            print("No face detected on camera "+str(j))
+            message = client.publish("face/val"+str(j), "no face")
             return
 
         for faceBox in faceBoxes:
@@ -83,7 +83,7 @@ for i in range (1,3):
             agePreds=ageNet.forward()
             age=ageList[agePreds[0].argmax()]
             print(f'Age: {age[1:-1]} years')
-            message = client.publish("face/val"+str(i), str(gender) + ", " + str(age))
+            message = client.publish("face/val"+str(j), str(gender) + ", " + str(age))
 
     faceNet=cv2.dnn.readNet(faceModel,faceProto)
     ageNet=cv2.dnn.readNet(ageModel,ageProto)
