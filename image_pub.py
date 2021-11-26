@@ -8,7 +8,7 @@ def getImage():
     if frame.shape[0] < 100:
         return
     image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
-    message = client.publish("face/cam", image_bytes)
+    message = client.publish("face/cam1", image_bytes)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -29,7 +29,7 @@ client.connect(mqttBroker,1883,60)
 client.on_publish = on_publish
 client.on_message = on_message
 client.on_connect = on_connect
-client.subscribe("face/val")
+client.subscribe("face/val1")
 
 while True:
     client.loop()
