@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import base64
 import os
+import advertisment
 
 faceProto="opencv_face_detector.pbtxt"
 faceModel="opencv_face_detector_uint8.pb"
@@ -80,11 +81,13 @@ def on_message(client, userdata, message,):
         print(f'Age: {age[1:-1]} years')
         message = client.publish("face/val", str(gender) + ", " + str(age))
 
+        advertisment.show_add(age, gender)
+
 faceNet=cv2.dnn.readNet(faceModel,faceProto)
 ageNet=cv2.dnn.readNet(ageModel,ageProto)
 genderNet=cv2.dnn.readNet(genderModel,genderProto)
 MODEL_MEAN_VALUES=(78.4263377603, 87.7689143744, 114.895847746)
-ageList=['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
+ageList=['(0-3)', '(4-7)', '(8-14)', '(15-24)', '(25-37)', '(38-47)', '(48-59)', '(60-100)']
 genderList=['Male','Female']
 
 mqttBroker="test.mosquitto.org"
