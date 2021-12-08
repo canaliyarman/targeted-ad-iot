@@ -1,10 +1,7 @@
 import paho.mqtt.client as mqtt
-import time
 import cv2
 import numpy as np
-import base64
 import os
-import advertisment
 
 faceProto="opencv_face_detector.pbtxt"
 faceModel="opencv_face_detector_uint8.pb"
@@ -15,7 +12,7 @@ genderModel="gender_net.caffemodel"
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    client.subscribe("face/cam1")
+    client.subscribe("face/cam")
 
 def highlightFace(net, frame, conf_threshold=0.7):
     if frame is None:
@@ -79,9 +76,7 @@ def on_message(client, userdata, message,):
         agePreds=ageNet.forward()
         age=ageList[agePreds[0].argmax()]
         print(f'Age: {age[1:-1]} years')
-        message = client.publish("face/val", str(gender) + ", " + str(age))
-
-        advertisment.show_add(age, gender)
+        message = client.publish("face/val", str(gender) + " " + str(age))
 
 faceNet=cv2.dnn.readNet(faceModel,faceProto)
 ageNet=cv2.dnn.readNet(ageModel,ageProto)

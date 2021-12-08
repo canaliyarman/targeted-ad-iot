@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import cv2
+import advertisment
 from time import sleep
 
 def getImage():
@@ -17,7 +18,18 @@ def on_connect(client, userdata, flags, rc):
     
 
 def on_message(client, userdata, message,):
+    
     print(str(message.payload))
+    temp = str(message.payload)
+    if "no" not in temp:
+        string = temp.split(" ")
+        age = string[1]
+        age = age.replace("'","")
+        gender = string[0]
+        gender = gender.replace("b'", "")
+        advertisment.show_add(age, gender)
+
+    
     
 
 def on_publish(client,userdata,result):
