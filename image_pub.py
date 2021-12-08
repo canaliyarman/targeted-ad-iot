@@ -3,31 +3,44 @@ import cv2
 import advertisment
 from time import sleep
 
+# Capture image from camera
 def getImage():
     cap = cv2.VideoCapture(0)
     hasFrame, frame = cap.read()
+    
+    # If captured image is malfored return
     if frame.shape[0] < 100:
         return
+
+    # Convert numpy array to byte array
     image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
     message = client.publish("face/cam", image_bytes)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
+
+    # Connect to val topic to get response from published images
     client.subscribe("face/val")
 
     
 
+# Once a new val is published to topic
 def on_message(client, userdata, message,):
     
     print(str(message.payload))
     temp = str(message.payload)
+
     if "no" not in temp:
         string = temp.split(" ")
         age = string[1]
         age = age.replace("'","")
         gender = string[0]
         gender = gender.replace("b'", "")
+
+        # show add for the age-gender key
         advertisment.show_add(age, gender)
+
+
 
     
     
@@ -35,6 +48,7 @@ def on_message(client, userdata, message,):
 def on_publish(client,userdata,result):
     print("sending image")
 
+# mosquitto's test broker open to anyone
 mqttBroker = "test.mosquitto.org"
 client = mqtt.Client("test_camera_device")
 client.connect(mqttBroker,1883,60)
@@ -43,6 +57,7 @@ client.on_message = on_message
 client.on_connect = on_connect
 client.subscribe("face/val")
 
+# main loop
 while True:
     client.loop()
     getImage()

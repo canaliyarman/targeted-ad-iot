@@ -12,6 +12,8 @@ genderModel="gender_net.caffemodel"
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
+
+    # subscribe to the cam topic to get published images
     client.subscribe("face/cam")
 
 def highlightFace(net, frame, conf_threshold=0.7):
@@ -38,15 +40,8 @@ def highlightFace(net, frame, conf_threshold=0.7):
 
 
 def on_message(client, userdata, message,):
-#    f = open('output.jpg', "wb")
-#    print(type(message.payload))
-#    f.write(message.payload)
-#    print("Image Received")
-#    f.close()
 
-
-#    jpg_as_np = np.frombuffer(message.payload, dtype=np.uint8)
-#    img = cv2.imdecode(jpg_as_np, flags=1)
+    # Load byte array and convert to numpy array to use dnn's
     jpg_as_np = np.frombuffer(message.payload, dtype=np.uint8)
     img = cv2.imdecode(jpg_as_np, flags=1)
     
@@ -55,10 +50,14 @@ def on_message(client, userdata, message,):
     os.remove('./0.jpg')
     
     padding=20
+
+    # Extract faces from the image
     resultImg,faceBoxes=highlightFace(faceNet,frame)
     if not faceBoxes:
+
+        # if no faces found
         print("No face detected")
-        message = client.publish("face/val", "no face")
+        #message = client.publish("face/val", "no face")
         return
 
     for faceBox in faceBoxes:
@@ -77,13 +76,21 @@ def on_message(client, userdata, message,):
         age=ageList[agePreds[0].argmax()]
         print(f'Age: {age[1:-1]} years')
         message = client.publish("face/val", str(gender) + " " + str(age))
+        # publish age and gender information to val topic
 
+        # right now first found face is analyzed for computation power issues/time
+
+
+# load trained dnn models for face detection, age and gender
 faceNet=cv2.dnn.readNet(faceModel,faceProto)
 ageNet=cv2.dnn.readNet(ageModel,ageProto)
 genderNet=cv2.dnn.readNet(genderModel,genderProto)
 MODEL_MEAN_VALUES=(78.4263377603, 87.7689143744, 114.895847746)
+
+# age and gender class
 ageList=['(0-3)', '(4-7)', '(8-14)', '(15-24)', '(25-37)', '(38-47)', '(48-59)', '(60-100)']
 genderList=['Male','Female']
+
 
 mqttBroker="test.mosquitto.org"
 client = mqtt.Client("test_image_processor")

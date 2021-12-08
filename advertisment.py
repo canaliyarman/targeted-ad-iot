@@ -1,5 +1,7 @@
 import cv2
 
+# demographic dict
+
 age_to_ad = {
     "(0-3) Male":"ads/one.jpg",
     "(4-7) Male":"ads/m_two.jpeg",
@@ -20,6 +22,10 @@ age_to_ad = {
 }
 
 def show_add(age, gender):
+    
+    # show image from the dict
     img = cv2.imread(age_to_ad[age +" " + gender])
     cv2.imshow("image", img)
+
+    # wait so it doesn't spam
     cv2.waitKey(0)
