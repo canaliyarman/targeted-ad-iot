@@ -1,0 +1,1 @@
+docker run --network host 86dfb17fb0e4 %1

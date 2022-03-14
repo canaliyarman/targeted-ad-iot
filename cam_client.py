@@ -3,12 +3,19 @@ import cv2
 import advertisment
 from time import sleep
 import requests
+import atexit
+
 
 r = requests.get('http://127.0.0.1:5000/handle')
 
 data = r.json()
 topic = data['topic']
 print(topic)
+
+def exit_handler():
+    print("Exiting")
+    message = client.publish("face/cam/" + topic, "exit")
+
 
 # Capture image from camera
 def getImage():
@@ -53,7 +60,7 @@ def on_message(client, userdata, message,):
     
 
 def on_publish(client,userdata,result):
-    print("sending image")
+    print("sending message")
 
 
 
@@ -65,7 +72,7 @@ client.on_publish = on_publish
 client.on_message = on_message
 client.on_connect = on_connect
 client.subscribe("face/val")
-
+atexit.register(exit_handler)
 # main loop
 while True:
     client.loop()

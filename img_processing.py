@@ -3,6 +3,11 @@ import cv2
 import numpy as np
 import os
 import sys
+import atexit
+
+def exit_handler():
+    print("Exiting")
+    return 1
 
 topic = sys.argv[1]
 print(topic)
@@ -13,6 +18,8 @@ ageProto="age_deploy.prototxt"
 ageModel="age_net.caffemodel"
 genderProto="gender_deploy.prototxt"
 genderModel="gender_net.caffemodel"
+
+atexit.register(exit_handler)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -44,6 +51,9 @@ def highlightFace(net, frame, conf_threshold=0.7):
 
 
 def on_message(client, userdata, message,):
+
+    if message.payload == "exit":
+        exit()
 
     # Load byte array and convert to numpy array to use dnn's
     jpg_as_np = np.frombuffer(message.payload, dtype=np.uint8)
@@ -84,6 +94,9 @@ def on_message(client, userdata, message,):
 
         # right now first found face is analyzed for computation power issues/time
 
+def on_disconnect(client, userdata, flags, rc):
+    if rc != 0:
+        print("Unexpected MQTT disconnection.")
 
 # load trained dnn models for face detection, age and gender
 faceNet=cv2.dnn.readNet(faceModel,faceProto)
@@ -102,4 +115,5 @@ client.connect(mqttBroker,1883,60)
 
 client.on_message=on_message
 client.on_connect = on_connect
+client.on_disconnect = on_disconnect
 client.loop_forever()
